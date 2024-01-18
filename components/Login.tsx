@@ -10,7 +10,6 @@ import {
 import { useState } from 'react';
 import { signInWithEmailAndPassword } from 'firebase/auth';
 import { auth } from '@/utils/firebase';
-import { useRouter } from 'next/router';
 
 function Login() {
   const [email, setEmail] = useState('');
