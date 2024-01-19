@@ -26,7 +26,7 @@ These instructions will help you set up a copy of the project on your local mach
 1. **Clone the Repository**
 
    ```bash
-   git clone https://github.com/your-repository.git
+   git clone https://github.com/jacklion710/user-interactive-email-list.git
    cd your-repository
    ```
 
