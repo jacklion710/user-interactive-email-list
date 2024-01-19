@@ -27,11 +27,26 @@ These instructions will help you set up a copy of the project on your local mach
 
    ```bash
    git clone https://github.com/jacklion710/user-interactive-email-list.git
-   cd your-repository
+   cd user-interactive-email-list
+   npm install
+   npm run dev
    ```
 
-2. **Set Environment Variable**
-Create a .env file in the root directory and add your Firebase and SendGrid API keys:
+2. **Install Dependencies**
+Run the following command to install the necessary dependencies:
+
+    ```bash
+    npm install
+    ```
+3. **Run the Development Server**
+Start the development server with:
+
+    ```bash
+    npm run dev
+    ```
+
+4. **Set Environment Variable**
+Create a .env.local file in the root directory and add your Firebase and SendGrid API keys:
 
     ```bash
     NEXT_PUBLIC_API_KEY=your_firebase_api_key
