@@ -20,7 +20,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
   const SENDGRID_API_KEY = process.env.SENDGRID_API_KEY;
 
   try {
-    // Fetch list ID for 'obscurity-users'
+    // Fetch list ID for 'obscurity-users' or whatever other list you wish
     const listResponse = await fetch('https://api.sendgrid.com/v3/marketing/lists', {
       headers: {
         'Authorization': `Bearer ${SENDGRID_API_KEY}`
@@ -32,7 +32,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
     }
 
     const lists = await listResponse.json();
-    const obscurityUsersList = lists.result.find((list: SendGridList) => list.name === 'obscurity-users');
+    const obscurityUsersList = lists.result.find((list: SendGridList) => list.name === 'obscurity-users'); // Replace this string and variable name with your desired list name
 
     if (!obscurityUsersList) {
       throw new Error('Obscurity-users list not found');
