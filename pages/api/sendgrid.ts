@@ -1,5 +1,7 @@
 import { NextApiRequest, NextApiResponse } from 'next';
 
+// TODO: Add other properties to collect user data from firestore for sendgrid
+
 interface SendGridList {
     id: string;
     name: string;
@@ -88,31 +90,50 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
       return res.status(200).json(result);
       
     } else if (action === 'remove') {
-        const apiUrl = `https://api.sendgrid.com/v3/marketing/lists/${listId}/contacts`;
-        const query = new URLSearchParams({ contact_ids: contactId }).toString();
-        const fullUrl = `${apiUrl}?${query}`;
+        // First, remove the user from the specific list
+        const listRemovalUrl = `https://api.sendgrid.com/v3/marketing/lists/${listId}/contacts`;
+        const listRemovalQuery = new URLSearchParams({ contact_ids: contactId }).toString();
+        const fullListRemovalUrl = `${listRemovalUrl}?${listRemovalQuery}`;
   
-        const response = await fetch(fullUrl, {
+        const listRemovalResponse = await fetch(fullListRemovalUrl, {
           method: 'DELETE',
           headers: {
             'Authorization': `Bearer ${SENDGRID_API_KEY}`
           },
-    });
+        });
+  
+        if (!listRemovalResponse.ok) {
+          const errorResponse = await listRemovalResponse.text();
+          console.error(`Error removing from list: ${errorResponse}`);
+          throw new Error(`Failed to remove from SendGrid list: ${listRemovalResponse.status}`);
+        }
+  
+        // Then, delete the user from All Contacts
+        const query = new URLSearchParams({ ids: contactId }).toString();
+        const allContactsRemovalUrl = `https://api.sendgrid.com/v3/marketing/contacts?${query}`;
 
-      if (!response.ok) {
-        const errorResponse = await response.text();
-        console.error(`SendGrid responded with error: ${errorResponse}`);
-        throw new Error(`Failed to remove from SendGrid contact list: ${response.status}`);
-      }
+        const allContactsResponse = await fetch(allContactsRemovalUrl, {
+            method: 'DELETE',
+            headers: {
+            'Authorization': `Bearer ${SENDGRID_API_KEY}`
+            },
+        });
 
-      const result = await response.json();
-      return res.status(200).json(result);
-      
-    } else {
+        if (!allContactsResponse.ok) {
+            const errorResponse = await allContactsResponse.text();
+            console.error(`Error removing from all contacts: ${errorResponse}`);
+            throw new Error(`Failed to remove from SendGrid all contacts: ${allContactsResponse.status}`);
+        }
+
+        // Success response
+        const result = await allContactsResponse.json();
+        return res.status(200).json(result);
+
+        } else {
         return res.status(400).json({ error: 'Invalid action' });
-    }
+        }
 
-  } catch (error) {
+    } catch (error) {
     if (error instanceof Error) {
         console.error('Error:', error.message);
         console.error('Detailed Error:', error);
