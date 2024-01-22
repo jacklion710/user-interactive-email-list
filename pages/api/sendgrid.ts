@@ -37,11 +37,17 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
     const listId = obscurityUsersList.id;
 
     if (action === 'add') {
+      const { firstName, lastName, username } = req.body; 
       // Handle 'add' action
       const apiUrl = 'https://api.sendgrid.com/v3/marketing/contacts';
       const data = {
         list_ids: [listId],
-        contacts: [{ email: email.toLowerCase() }],
+        contacts: [{
+          email: email.toLowerCase(),
+          first_name: firstName,
+          last_name: lastName,
+          unique_name: username,
+        }],
       };
 
       const response = await fetch(apiUrl, {

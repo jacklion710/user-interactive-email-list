@@ -51,46 +51,52 @@ import {
     const handleOptInChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
       const optedIn = e.target.checked;
       setIsOptedIn(optedIn);
-    
+  
       if (user && user.uid) {
         const db = getFirestore();
         const userDocRef = doc(db, 'users', user.uid);
-    
+  
         try {
-          // Fetch user data from Firestore
           const userDoc = await getDoc(userDocRef);
           if (userDoc.exists()) {
             const userData = userDoc.data();
-            
+  
             // Update local state
             setLocalUser({ ...localUser, isOptedIn: optedIn });
-    
+  
             // Update Firestore with new opt-in status
             await setDoc(userDocRef, { isOptedIn: optedIn }, { merge: true });
-            
+  
             console.log(`Firestore updated with opt-in status: ${optedIn}`);
-    
-            // Determine action based on opt-in status
+  
             const action = optedIn ? 'add' : 'remove';
-            const userEmail = userData.email; // Assuming userData contains the email
-    
+            const userEmail = userData.email;
+            const displayNameParts = userData.displayName.split(' ');
+            const firstName = displayNameParts[0];
+            const lastName = displayNameParts.slice(1).join(' ') || ''; // Handle cases with no last name
+            const username = userData.username; // Assuming username is available in userData
+  
             // Send to SendGrid API
             const response = await fetch('/api/sendgrid', {
               method: 'POST',
-              headers: {
-                'Content-Type': 'application/json',
-              },
-              body: JSON.stringify({ email: userEmail, action }),
+              headers: { 'Content-Type': 'application/json' },
+              body: JSON.stringify({
+                email: userEmail,
+                action,
+                firstName,
+                lastName,
+                username
+              }),
             });
-    
+  
             console.log(`Response from SendGrid API: Status - ${response.status}`);
-    
+  
             if (!response.ok) {
               throw new Error(`Failed to ${action === 'add' ? 'add to' : 'remove from'} SendGrid contact list`);
             }
-    
+  
             console.log(`SendGrid contact list updated: ${action === 'add' ? 'added' : 'removed'}`);
-    
+  
           } else {
             console.error("User document does not exist.");
           }
@@ -98,7 +104,7 @@ import {
           console.error('Error in opt-in process:', error);
         }
       }
-    };    
+    };  
   
     return (
       <ChakraProvider>
